@@ -5,11 +5,11 @@ radio.onReceivedNumber(function (receivedNumber) {
         Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Reverse, 80)
     } else if (receivedNumber == 3) {
         Kitronik_Move_Motor.spin(Kitronik_Move_Motor.SpinDirections.Left, 30)
-        basic.pause(100)
+        basic.pause(200)
         Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Forward, 100)
     } else if (receivedNumber == 4) {
         Kitronik_Move_Motor.spin(Kitronik_Move_Motor.SpinDirections.Right, 30)
-        basic.pause(100)
+        basic.pause(200)
         Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Forward, 100)
     } else if (receivedNumber == 5) {
         Kitronik_Move_Motor.stop()
