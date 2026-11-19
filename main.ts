@@ -61,16 +61,6 @@ let faseLuz = false
 radio.setGroup(5)
 let moveMotorZIP = Kitronik_Move_Motor.createMoveMotorZIPLED(4)
 music.setTempo(180)
-// Mantiene siempre la cara sonriente en la matriz LED
-basic.forever(function () {
-    basic.showLeds(`
-        . . . . .
-        . # . # .
-        . . . . .
-        # . . . #
-        . # # # .
-        `)
-})
 // Control de luces navideñas según la dirección
 basic.forever(function () {
     moveMotorZIP.clear()
@@ -147,11 +137,13 @@ basic.forever(function () {
     }
     basic.pause(100)
 })
-// Anticolisión por ultrasonidos (solo frena si va hacia adelante)
+// Mantiene siempre la cara sonriente en la matriz LED
 basic.forever(function () {
-    if (Kitronik_Move_Motor.measure() <= 5 && estado == 1) {
-        estado = 0
-        marchaAnterior = 0
-        Kitronik_Move_Motor.stop()
-    }
+    basic.showLeds(`
+        . . . . .
+        . # . # .
+        . . . . .
+        # . . . #
+        . # # # .
+        `)
 })
