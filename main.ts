@@ -12,93 +12,59 @@ radio.onReceivedNumber(function (receivedNumber) {
         basic.pause(200)
         Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Forward, 100)
     } else if (receivedNumber == 5) {
-        // PARAR TODO: motores y música al instante
         Kitronik_Move_Motor.stop()
-        Musica = 0
-        music.stopAllSounds()
     } else if (receivedNumber == 6) {
         Kitronik_Move_Motor.beepHorn()
     } else if (receivedNumber == 7) {
-        // Detenemos el sonido actual antes de cambiar de canción
-        music.stopAllSounds()
+        // Selector de canciones: pasa de 0 a 2 y vuelve a 0
         Musica = (Musica + 1) % 3
     }
 })
-
 input.onButtonPressed(Button.A, function () {
     Kitronik_Move_Motor.stop()
-    Musica = 0
-    music.stopAllSounds()
 })
-
-// Función auxiliar para tocar una nota SOLO si la música sigue encendida
-function tocarNota(frecuencia: number, duracion: number) {
-    if (Musica != 0) {
-        music.playTone(frecuencia, duracion)
-    }
-}
-
 let Musica = 0
 radio.setGroup(5)
 let moveMotorZIP = Kitronik_Move_Motor.createMoveMotorZIPLED(4)
 Musica = 0
-music.setTempo(180)
-
-// Bucle de música interrumpible
+music.setTempo(150)
+// Bucle principal para reproducir la música según el valor de 'Musica'
 basic.forever(function () {
     if (Musica == 1) {
-        // Canción 1: Jingle Bells (Villancico)
-        tocarNota(330, music.beat(BeatFraction.Whole))
-        tocarNota(330, music.beat(BeatFraction.Whole))
-        tocarNota(330, music.beat(BeatFraction.Double))
-        tocarNota(330, music.beat(BeatFraction.Whole))
-        tocarNota(330, music.beat(BeatFraction.Whole))
-        tocarNota(330, music.beat(BeatFraction.Double))
-        tocarNota(330, music.beat(BeatFraction.Whole))
-        tocarNota(392, music.beat(BeatFraction.Whole))
-        tocarNota(262, music.beat(BeatFraction.Whole))
-        tocarNota(294, music.beat(BeatFraction.Whole))
-        tocarNota(330, music.beat(BeatFraction.Breve))
-        if (Musica == 1) {
-            tocarNota(349, music.beat(BeatFraction.Whole))
-            tocarNota(349, music.beat(BeatFraction.Whole))
-            tocarNota(349, music.beat(BeatFraction.Whole))
-            tocarNota(349, music.beat(BeatFraction.Whole))
-            tocarNota(349, music.beat(BeatFraction.Whole))
-            tocarNota(330, music.beat(BeatFraction.Whole))
-            tocarNota(330, music.beat(BeatFraction.Whole))
-            tocarNota(330, music.beat(BeatFraction.Half))
-            tocarNota(330, music.beat(BeatFraction.Half))
-            tocarNota(330, music.beat(BeatFraction.Whole))
-            tocarNota(294, music.beat(BeatFraction.Whole))
-            tocarNota(294, music.beat(BeatFraction.Whole))
-            tocarNota(330, music.beat(BeatFraction.Whole))
-            tocarNota(294, music.beat(BeatFraction.Double))
-            tocarNota(392, music.beat(BeatFraction.Double))
-        }
+        // Canción 1: Tu canción original (Navideña o Melodía alegre)
+        music.playTone(330, music.beat(BeatFraction.Whole))
+        music.playTone(330, music.beat(BeatFraction.Whole))
+        music.playTone(330, music.beat(BeatFraction.Double))
+        music.playTone(330, music.beat(BeatFraction.Whole))
+        music.playTone(330, music.beat(BeatFraction.Whole))
+        music.playTone(330, music.beat(BeatFraction.Double))
+        music.playTone(330, music.beat(BeatFraction.Whole))
+        music.playTone(392, music.beat(BeatFraction.Whole))
+        music.playTone(262, music.beat(BeatFraction.Whole))
+        music.playTone(294, music.beat(BeatFraction.Whole))
+        music.playTone(330, music.beat(BeatFraction.Breve))
     } else if (Musica == 2) {
-        // Canción 2: Star Wars (Marcha Imperial)
-        tocarNota(440, music.beat(BeatFraction.Whole))
-        tocarNota(440, music.beat(BeatFraction.Whole))
-        tocarNota(440, music.beat(BeatFraction.Whole))
-        tocarNota(349, music.beat(BeatFraction.Half))
-        tocarNota(523, music.beat(BeatFraction.Half))
-        tocarNota(440, music.beat(BeatFraction.Whole))
-        tocarNota(349, music.beat(BeatFraction.Half))
-        tocarNota(523, music.beat(BeatFraction.Half))
-        tocarNota(440, music.beat(BeatFraction.Double))
+        // Canción 2: Mini Star Wars (Marcha Imperial abreviada)
+        music.playTone(440, music.beat(BeatFraction.Quarter))
+        music.playTone(440, music.beat(BeatFraction.Quarter))
+        music.playTone(440, music.beat(BeatFraction.Quarter))
+        music.playTone(349, music.beat(BeatFraction.Half))
+        music.playTone(523, music.beat(BeatFraction.Half))
+        music.playTone(440, music.beat(BeatFraction.Quarter))
+        music.playTone(349, music.beat(BeatFraction.Half))
+        music.playTone(523, music.beat(BeatFraction.Half))
+        music.playTone(440, music.beat(BeatFraction.Whole))
+    } else {
+        basic.pause(200)
     }
-    basic.pause(100)
 })
-
-// Sensor de distancia (anticolisión)
+// Sistema anticolisiones por ultrasonidos
 basic.forever(function () {
     if (Kitronik_Move_Motor.measure() <= 5) {
         Kitronik_Move_Motor.stop()
     }
 })
-
-// Luces LED y cara en la matriz
+// Luces LED y animación de la pantalla
 basic.forever(function () {
     basic.showLeds(`
         . . . . .
