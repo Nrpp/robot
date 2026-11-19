@@ -1,21 +1,25 @@
+/**
+ * Estados: 0 = Parado, 1 = Adelante, 2 = Atrás, 3 = Izquierda, 4 = Derecha
+ */
 radio.onReceivedNumber(function (receivedNumber) {
     if (receivedNumber == 1) {
-        avanzando = true
+        estado = 1
+        marchaAnterior = 1
         Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Forward, 100)
     } else if (receivedNumber == 2) {
-        avanzando = false
+        estado = 2
+        marchaAnterior = 2
         Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Reverse, 80)
     } else if (receivedNumber == 3) {
-        // Gira a la izquierda continuamente mientras se mantenga A
-        avanzando = false
+        estado = 3
         Kitronik_Move_Motor.spin(Kitronik_Move_Motor.SpinDirections.Left, 40)
     } else if (receivedNumber == 4) {
-        // Gira a la derecha continuamente mientras se mantenga B
-        avanzando = false
+        estado = 4
         Kitronik_Move_Motor.spin(Kitronik_Move_Motor.SpinDirections.Right, 40)
     } else if (receivedNumber == 5) {
-        // Parar motores y música
-        avanzando = false
+        // Parar por completo
+        estado = 0
+        marchaAnterior = 0
         Kitronik_Move_Motor.stop()
         Musica = 0
         music.stopAllSounds()
@@ -24,10 +28,23 @@ radio.onReceivedNumber(function (receivedNumber) {
     } else if (receivedNumber == 7) {
         music.stopAllSounds()
         Musica = (Musica + 1) % 3
+    } else if (receivedNumber == 8) {
+        // Terminó de girar: recupera la marcha que llevaba antes
+        if (marchaAnterior == 1) {
+            estado = 1
+            Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Forward, 100)
+        } else if (marchaAnterior == 2) {
+            estado = 2
+            Kitronik_Move_Motor.move(Kitronik_Move_Motor.DriveDirections.Reverse, 80)
+        } else {
+            estado = 0
+            Kitronik_Move_Motor.stop()
+        }
     }
 })
 input.onButtonPressed(Button.A, function () {
-    avanzando = false
+    estado = 0
+    marchaAnterior = 0
     Kitronik_Move_Motor.stop()
     Musica = 0
     music.stopAllSounds()
@@ -38,40 +55,53 @@ function tocarNota (frecuencia: number, duracion: number) {
     }
 }
 let Musica = 0
-let avanzando = false
+let marchaAnterior = 0
+let estado = 0
+let faseLuz = false
 radio.setGroup(5)
 let moveMotorZIP = Kitronik_Move_Motor.createMoveMotorZIPLED(4)
-moveMotorZIP.clear()
-moveMotorZIP.show()
 music.setTempo(180)
-// Muestra la cara sonriente una sola vez al iniciar
-basic.showLeds(`
-    . . . . .
-    . # . # .
-    . . . . .
-    # . . . #
-    . # # # .
-    `)
-// Control de luces: solo los 2 LEDs delanteros (0 y 1) en rojo/verde al avanzar
+// Mantiene siempre la cara sonriente en la matriz LED
 basic.forever(function () {
-    if (avanzando) {
-        moveMotorZIP.clear()
-        moveMotorZIP.setZipLedColor(0, Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Green))
-        moveMotorZIP.setZipLedColor(1, Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Red))
-        moveMotorZIP.show()
-        basic.pause(350)
-        if (avanzando) {
-            moveMotorZIP.clear()
-            moveMotorZIP.setZipLedColor(0, Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Red))
-            moveMotorZIP.setZipLedColor(1, Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Green))
-            moveMotorZIP.show()
-            basic.pause(350)
-        }
+    basic.showLeds(`
+        . . . . .
+        . # . # .
+        . . . . .
+        # . . . #
+        . # # # .
+        `)
+})
+// Control de luces navideñas según la dirección
+basic.forever(function () {
+    moveMotorZIP.clear()
+    let colorA = faseLuz ? Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Green) : Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Red)
+let colorB = faseLuz ? Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Red) : Kitronik_Move_Motor.colors(Kitronik_Move_Motor.ZipLedColors.Green)
+if (estado == 1) {
+        // Adelante: LEDs 0 y 1
+        moveMotorZIP.setZipLedColor(0, colorA)
+        moveMotorZIP.setZipLedColor(1, colorB)
+    } else if (estado == 2) {
+        // Atrás: LEDs 2 y 3
+        moveMotorZIP.setZipLedColor(2, colorA)
+        moveMotorZIP.setZipLedColor(3, colorB)
+    } else if (estado == 3) {
+        // Izquierda: LEDs 0 y 3
+        moveMotorZIP.setZipLedColor(0, colorA)
+        moveMotorZIP.setZipLedColor(3, colorB)
+    } else if (estado == 4) {
+        // Derecha: LEDs 1 y 2
+        moveMotorZIP.setZipLedColor(1, colorA)
+        moveMotorZIP.setZipLedColor(2, colorB)
     } else {
-        moveMotorZIP.clear()
-        moveMotorZIP.show()
-        basic.pause(100)
+        // Parado (estado == 0): Todos los LEDs
+        moveMotorZIP.setZipLedColor(0, colorA)
+        moveMotorZIP.setZipLedColor(1, colorB)
+        moveMotorZIP.setZipLedColor(2, colorA)
+        moveMotorZIP.setZipLedColor(3, colorB)
     }
+    moveMotorZIP.show()
+    faseLuz = !(faseLuz)
+    basic.pause(350)
 })
 // Bucle de música
 basic.forever(function () {
@@ -117,10 +147,11 @@ basic.forever(function () {
     }
     basic.pause(100)
 })
-// Anticolisión por ultrasonidos
+// Anticolisión por ultrasonidos (solo frena si va hacia adelante)
 basic.forever(function () {
-    if (Kitronik_Move_Motor.measure() <= 5) {
-        avanzando = false
+    if (Kitronik_Move_Motor.measure() <= 5 && estado == 1) {
+        estado = 0
+        marchaAnterior = 0
         Kitronik_Move_Motor.stop()
     }
 })
